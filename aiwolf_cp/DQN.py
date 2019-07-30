@@ -228,6 +228,7 @@ class SampleAgent(object):
     def update(self, base_info, diff_data, request):
         #print(self.day,"update")
         #print(diff_data)
+        print("update")
         self.base_info = base_info
         self.diff_data = diff_data
         self.statusMap = base_info["statusMap"]
@@ -356,11 +357,14 @@ class SampleAgent(object):
 
 
     def attack(self):
+        print("attack")
         if self.day == 0:
             #print("307")
             self.attackIdx = np.argmax(self.winlists)+1
+            print("attack1")
             return self.attackIdx
         elif self.day != 0:
+            print("attack2")
             possibleActions = self.possible()
             state = np.concatenate((self.stateEs.reshape([self.playerNum*self.playerNum]),self.stateCo.reshape([self.playerNum*self.playerNum])))
             state = np.concatenate((self.stateVote.reshape([self.playerNum*self.playerNum]),state))
@@ -371,19 +375,22 @@ class SampleAgent(object):
             state = np.concatenate(([self.day],state))
             state = np.concatenate(([code[self.role]],state))
             #print(self.stateLog_special)
+            print("attack3")
             if len(self.stateLog_special) != 0 and len(self.actionLog_special) != 0:
                 assert self.playerNum == len(self.actionLog_special[-1]), '期待[{0}], 入力[{1}]'.format(str(self.playerNum), len(self.actionLog_special[-1]))
                 self.dqn_special.update_DQN(self.stateLog_special[-1], state, self.actionLog_special[-1], 0, False,self.gamecount,self.playerNum)
-
+            print("attack4")
             action_index = self.dqn_special.get_action(possibleActions,self.possiblewolf,state,self.role,self.playerNum)
             self.stateLog_special.append(state)
                 #print(log_action)
             actions = self.onehot(action_index-1,self.playerNum)
             self.actionLog_special.append(actions)
             self.attackIdx = action_index
+            print("attack5")
             return action_index
 
     def divine(self):
+        print("divine")
         possibleActions = self.possible()
         state = np.concatenate((self.stateEs.reshape([self.playerNum*self.playerNum]),self.stateCo.reshape([self.playerNum*self.playerNum])))
         state = np.concatenate((self.stateVote.reshape([self.playerNum*self.playerNum]),state))
@@ -407,6 +414,7 @@ class SampleAgent(object):
 
 
     def vote(self):
+        print("vote")
         possibleActions = self.possible()
         state = np.concatenate((self.stateEs.reshape([self.playerNum*self.playerNum]),self.stateCo.reshape([self.playerNum*self.playerNum])))
         state = np.concatenate((self.stateVote.reshape([self.playerNum*self.playerNum]),state))
@@ -417,15 +425,18 @@ class SampleAgent(object):
         state = np.concatenate(([self.day],state))
         state = np.concatenate(([code[self.role]],state))
         #print(self.stateLog_special)
+        print("vote1")
         if len(self.stateLog_vote) != 0 and len(self.actionLog_vote) != 0:
             assert self.playerNum == len(self.actionLog_vote[-1]), '期待[{0}], 入力[{1}]'.format(str(self.playerNum), len(self.actionLog_vote[-1]))
             self.dqn_vote.update_DQN(self.stateLog_vote[-1], state, self.actionLog_vote[-1], 0, False,self.gamecount,self.playerNum)
-
+        print("vote4")
         action_index = self.dqn_vote.get_action(possibleActions,self.possiblewolf,state,self.role,self.playerNum)
         self.stateLog_vote.append(state)
         #print(log_action)
+        print("vote2")
         actions = self.onehot(action_index-1,self.playerNum)
         self.actionLog_vote.append(actions)
+        print("vote3")
         return action_index
 
     def guard(self):

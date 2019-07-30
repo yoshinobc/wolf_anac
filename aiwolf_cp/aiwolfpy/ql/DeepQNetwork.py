@@ -26,7 +26,7 @@ class DeepQNetwork:
             self.epsilon = EPSILON
             print(self.role,self.act,15)
             if os.path.exists(os.getcwd() + "/aiwolfpy/ql/train_states"):
-                self.states = pickle.load(open(os.getcwd() + "/aiwolfpy/ql/train_states","rb")
+                self.states = pickle.load(open(os.getcwd() + "/aiwolfpy/ql/train_states","rb"))
             else:
                 self.states = set()
             if os.path.exists(os.getcwd() + "/aiwolfpy/ql/data/" + self.role + "_" + self.act+"_replayMemory_" + str(self.actions)):
@@ -144,7 +144,10 @@ class DeepQNetwork:
     def update_DQN(self,state,nextobservation,action,reward,terminal,gamecount,num):
         #print("state",len(state),"action",len(action),"nextobservation",len(nextobservation))
         self.buffer.append((state,action,reward,nextobservation,terminal))
-        self.states.add(state)
+        if len(self.states) > 50000:
+            pass
+        else:
+            self.states.add(state)
         if len(self.buffer) > MAXSIZE:
             self.buffer.popleft()
         if self.step > INITIAL_REPLAY and (self.step - INITIAL_REPLAY) % UPDATE_STEP == 0:
@@ -227,6 +230,7 @@ class DeepQNetwork:
         if self.epsilon <= np.random.uniform(0,1):
             retTargetQs = self.QValue.eval(session=self.session,feed_dict = {self.x:[state]})[0]
             while True:
+                print("test")
                 count += 1
                 if count==20:
                     action_index = random.randrange(num)
@@ -247,6 +251,7 @@ class DeepQNetwork:
                     retTargetQs[action_index] = float("-inf")
         else:
             while True:
+                print("test2")
                 action_index = random.randrange(num)
                 if possibleActions[action_index]:
                     action[action_index] = 1
