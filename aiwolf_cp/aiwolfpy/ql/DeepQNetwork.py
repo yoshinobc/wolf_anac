@@ -25,6 +25,10 @@ class DeepQNetwork:
             self.act = network_type_act
             self.epsilon = EPSILON
             print(self.role,self.act,15)
+            if os.path.exists(os.getcwd() + "/aiwolfpy/ql/train_states"):
+                self.states = pickle.load(open(os.getcwd() + "/aiwolfpy/ql/train_states","rb")
+            else:
+                self.states = set()
             if os.path.exists(os.getcwd() + "/aiwolfpy/ql/data/" + self.role + "_" + self.act+"_replayMemory_" + str(self.actions)):
                 self.buffer = pickle.load(open(os.getcwd() + "/aiwolfpy/ql/data/" + self.role + "_" + self.act+"_replayMemory_" + str(self.actions),"rb+"))
             else:
@@ -81,7 +85,7 @@ class DeepQNetwork:
             self.epsilon = EPSILON
             print(self.role,self.act)
 
-            if (os.path.exists(os.getcwd()+"/aiwolfpy/ql/data/" + self.role + "_" + self.act+"_replayMemory_" + str(self.actions))):
+            if (os.path.exists(os.getcwd()+"/aiwolfpy/ql/data" + self.role + "_" + self.act+"_replayMemory_" + str(self.actions))):
                 self.buffer = pickle.load(open(os.getcwd()+"/aiwolfpy/ql/data/" + self.role + "_" + self.act+"_replayMemory_" + str(self.actions),"rb+"))
             else:
                 self.buffer = collections.deque(maxlen = MAXSIZE)
@@ -140,6 +144,7 @@ class DeepQNetwork:
     def update_DQN(self,state,nextobservation,action,reward,terminal,gamecount,num):
         #print("state",len(state),"action",len(action),"nextobservation",len(nextobservation))
         self.buffer.append((state,action,reward,nextobservation,terminal))
+        self.states.add(state)
         if len(self.buffer) > MAXSIZE:
             self.buffer.popleft()
         if self.step > INITIAL_REPLAY and (self.step - INITIAL_REPLAY) % UPDATE_STEP == 0:
@@ -148,6 +153,8 @@ class DeepQNetwork:
         if self.step % 1000 == 0:
         #if False:
             print("save")
+            print("states num: ",len(self.states))
+            pickle.dump(self.states,open("aiwolf/ql/train_states","wb"))
             self.saver.save(self.session,"aiwolfpy/ql/saved_networks_" + self.role + "_" + self.act + "_"+str(num) + "/network" + self.role + "_" + self.act + "_" + str(num),global_step=self.step)
             pickle.dump(self.buffer,open("aiwolfpy/ql/data/" + self.role + "_" + self.act+"_replayMemory_"+str(num),"wb+"))
             pickle.dump(self.step,open("aiwolfpy/ql/data/" + self.role + "_" + self.act+"_step_"+str(num),"wb+"))
